@@ -1,0 +1,35 @@
+High-Level Elements:
+- Window
+- background image
+- background alpha rect
+- title text
+- text entry box
+- search / enter buttons
+
+
+Color Scheme:
+- theme color changes if in search / enter mode
+    * enter mode is purple
+    * search mode is teal
+- background is metallic grey
+- title text is white
+- text entry box:
+    * border is theme color
+    * background is alpha white with theme color tinge?
+    * mouse over brightens to theme highlight
+    * mouse over changes cursor to text
+    * click animates border away to just bottom
+    * caret is white
+    * text is white
+- search / enter buttons
+    * border is theme color
+    * hover turns border and icon to theme highlight
+    * icon is theme color
+    * background is nothing default, white highlight when hover, lighter when click
+    * click moves icon down and right (depress)
+
+
+Text Highlight + Shadow:
+- capital letters change to theme color highlight
+- topic / highlight / keyword / etc. have color coded highlights, all transparency
+- regular highlight is theme alternate color

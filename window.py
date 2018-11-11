@@ -19,11 +19,11 @@ class MainWindow(pyglet.window.Window):
 
         # Background
         self.background = pyglet.resource.image('assets/pexels-photo-242236.jpeg')
-        self.background_shadow = Rectangle(self.batch, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_SHADOW_COLOR)
+        self.background_shadow = Rectangle(self.batch, None, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_SHADOW_COLOR)
 
         # Button icons
-        self.search_icon = pyglet.resource.image('assets/search-purple.png')
-        self.enter_icon = pyglet.resource.image('assets/login-teal.png')
+        self.search_icon = pyglet.resource.image('assets/search2-purple.png')
+        self.enter_icon = pyglet.resource.image('assets/login2-teal.png')
 
         # Title
         self.title = pyglet.text.Label(TITLE_TEXT, FONT, TITLE_SIZE, x=self.width // 2, y=TITLE_Y,
@@ -31,7 +31,7 @@ class MainWindow(pyglet.window.Window):
 
         # Text box
         self.box = TextBox(self, self.batch, (WINDOW_WIDTH // 2 - (BOX_WIDTH + BUTTON_WIDTH) // 2, BOX_Y),
-                           (BOX_WIDTH, BOX_HEIGHT), BOX_BORDER_DEFAULT, 1, (255, 255, 255, 10))
+                           (BOX_WIDTH, BOX_HEIGHT), BOX_BORDER_DEFAULT, (255, 255, 255, 10))
         self.box.hover_border_color = BOX_BORDER_HOVER
 
         # Button
@@ -51,7 +51,12 @@ class MainWindow(pyglet.window.Window):
 
 
     def _change_mode(self):
-        print('changing mode now')
+        if self.mode == Mode.ENTER:
+            self.mode = Mode.SEARCH
+            self.mode_button.set_icon(self.search_icon)
+        elif self.mode == Mode.SEARCH:
+            self.mode = Mode.ENTER
+            self.mode_button.set_icon(self.enter_icon)
 
     def _update_focus(self):
         for i in range(len(self.focusable_controls)):
@@ -62,6 +67,8 @@ class MainWindow(pyglet.window.Window):
             control.handle_mouse_motion(x, y)
 
     def on_mouse_press(self, x, y, button, modifiers):
+        print('mouse was pressed at %d, %d with button %s || (%s)' % (x, y, button, modifiers))
+
         for control in self.mouse_click_controls:
             if control.handle_mouse_press(x, y, button, modifiers):
                 self.focused_control_index = self.focusable_controls.index(control)

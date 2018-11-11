@@ -32,22 +32,22 @@ class Button(object):
         }
 
         self.background = Rectangle(
-            batch, location[0], location[1],
-            location[0] + size[0], location[1] + size[1], self._get_background()
+            batch, None, location[0], location[1],
+            location[0] + size[0], location[1] - size[1], self._get_background()
         )
 
         # Border is comprised of 4 line segments (left, top, right, bottom)
         self.border = [
-            Line(batch, location, (location[0], location[1] + size[1]), border_thickness, self._get_border()),
-            Line(batch, location, (location[0] + size[0], location[1]), border_thickness, self._get_border()),
-            Line(batch, (location[0] + size[0], location[1]), (location[0] + size[0], location[1] + size[1]),
+            Line(batch, None, location, (location[0], location[1] - size[1]), border_thickness, self._get_border()),
+            Line(batch, None, location, (location[0] + size[0], location[1]), border_thickness, self._get_border()),
+            Line(batch, None, (location[0] + size[0], location[1]), (location[0] + size[0], location[1] - size[1]),
                  border_thickness, self._get_border()),
-            Line(batch, (location[0], location[1] + size[1]), (location[0] + size[0], location[1] + size[1]),
+            Line(batch, None, (location[0], location[1] - size[1]), (location[0] + size[0], location[1] - size[1]),
                  border_thickness, self._get_border()),
         ]
 
-        self.sprite = pyglet.sprite.Sprite(icon, location[0] + 5, location[1] + 5, batch=self.batch)
-        self.sprite.scale = 0.4
+        self.sprite = pyglet.sprite.Sprite(icon, location[0], location[1] - size[1], batch=self.batch)
+        self.sprite.scale = 1.0
 
     def _get_background(self):
         return self.background_color[self.state]
@@ -69,6 +69,11 @@ class Button(object):
         self.state = new_state
         self._update_style()
 
+    def set_icon(self, new_icon):
+        self.icon = new_icon
+        self.sprite.delete()
+        self.sprite = pyglet.sprite.Sprite(self.icon, self.location[0], self.location[1] - self.size[1], batch=self.batch)
+
     def alter_focus(self, flag):
         # Cannot focus disabled or pressed controls
         if self.state == ButtonState.DISABLED or self.state == ButtonState.PRESSED:
@@ -85,7 +90,7 @@ class Button(object):
 
     def handle_mouse_motion(self, x, y):
         if (0 < x - self.location[0] < self.size[0] and
-                0 < y - self.location[1] < self.size[1]):
+                0 < self.location[1] - y < self.size[1]):
             # Only change to hover state if we are in DEFAULT
             if self.state == ButtonState.DEFAULT or self.state == ButtonState.FOCUS:
                 self._change_state(ButtonState.HOVER)
@@ -96,13 +101,13 @@ class Button(object):
 
     def handle_mouse_press(self, x, y, button, modifiers):
         if (0 < x - self.location[0] < self.size[0] and
-                0 < y - self.location[1] < self.size[1]):
+                0 < self.location[1] - y < self.size[1]):
             self._change_state(ButtonState.PRESSED)
             return True
 
     def handle_mouse_release(self, x, y, button, modifiers):
         if (0 < x - self.location[0] < self.size[0] and
-                0 < y - self.location[1] < self.size[1]):
+                0 < self.location[1] - y < self.size[1]):
             if self.state == ButtonState.PRESSED:
                 self._change_state(ButtonState.HOVER)
                 if self.click_actions:

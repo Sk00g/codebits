@@ -6,12 +6,17 @@ from primitives import Rectangle, Line
 
 
 class TextBox(object):
-    def __init__(self, window, batch, location, size, border_color, border_thickness=1, background=(0, 0, 0, 0)):
+    def __init__(self, window, batch, location, size, border_color, background=(0, 0, 0, 0)):
         self.host_window = window
         self.batch = batch
         self.location = location
         self.size = size
+        self._original_height = size[1]
         self.state = ControlState.DEFAULT
+        self.bkgr_group = pyglet.graphics.OrderedGroup(0)
+        self.foreground_group = pyglet.graphics.OrderedGroup(1)
+        self.background = None
+        self.border = []
 
         # Set values based on state
         self.border_color = {
@@ -27,18 +32,7 @@ class TextBox(object):
             ControlState.HOVER: background
         }
 
-        self.background = Rectangle(
-            batch, location[0], location[1],
-            location[0] + size[0], location[1] + size[1], self._get_background()
-        )
-
-        # Border is comprised of 4 line segments (left, top, right, bottom)
-        self.border = [
-            Line(batch, location, (location[0], location[1] + size[1]), border_thickness, self._get_border()),
-            Line(batch, location, (location[0] + size[0], location[1]), border_thickness, self._get_border()),
-            Line(batch, (location[0] + size[0], location[1]), (location[0] + size[0], location[1] + size[1]), border_thickness, self._get_border()),
-            Line(batch, (location[0], location[1] + size[1]), (location[0] + size[0], location[1] + size[1]), border_thickness, self._get_border()),
-        ]
+        self._generate_visual_elements()
 
         # Formatted document stores the formatting and text
         self.document = pyglet.text.document.FormattedDocument(' ')
@@ -46,11 +40,11 @@ class TextBox(object):
         self.document.text = ''
 
         # IncrementalLayout handles displaying the document
-        self.layout = pyglet.text.layout.IncrementalTextLayout(self.document,
-                                                               size[0], size[1],
+        self.layout = pyglet.text.layout.IncrementalTextLayout(self.document, size[0] - 20, size[1],
+                                                               wrap_lines=True, group=self.foreground_group,
                                                                multiline=True, batch=self.batch)
         self.layout.x = location[0] + 10
-        self.layout.y = location[1] - 8
+        self.layout.y = location[1] - size[1] - 8
         self.layout.selection_color = CT_NEARWHITE
         self.layout.selection_background_color = CT_PRIMARY['search']
 
@@ -66,6 +60,27 @@ class TextBox(object):
 
     def _get_border(self):
         return self.border_color[self.state]
+
+    def _generate_visual_elements(self):
+        if self.background and self.border:
+            self.background.delete()
+            for line in self.border:
+                line.delete()
+
+        self.background = Rectangle(
+            self.batch, self.bkgr_group, self.location[0], self.location[1],
+            self.location[0] + self.size[0], self.location[1] - self.size[1], self._get_background()
+        )
+
+        # Border is comprised of 4 line segments (left, top, right, bottom)
+        self.border = [
+            Line(self.batch, self.bkgr_group, self.location, (self.location[0], self.location[1] - self.size[1]), 1, self._get_border()),
+            Line(self.batch, self.bkgr_group, self.location, (self.location[0] + self.size[0], self.location[1]), 1, self._get_border()),
+            Line(self.batch, self.bkgr_group, (self.location[0] + self.size[0], self.location[1]), (self.location[0] + self.size[0],
+                                                                                                    self.location[1] - self.size[1]), 1, self._get_border()),
+            Line(self.batch, self.bkgr_group, (self.location[0], self.location[1] - self.size[1]), (self.location[0] + self.size[0],
+                                                                                                    self.location[1] - self.size[1]), 1, self._get_border()),
+        ]
 
     # Updates colors and other styles based on current state
     def _update_style(self):
@@ -83,12 +98,9 @@ class TextBox(object):
         self.state = new_state
         self._update_style()
 
-        # Special text-caret functionality
-        # self.caret.on_mouse_press(self.location[0], self.location[1], mouse.LEFT, 0)
-
     def handle_mouse_motion(self, x, y):
         if (0 < x - self.location[0] < self.size[0] and
-            0 < y - self.location[1] < self.size[1]):
+            0 < self.location[1] - y < self.size[1]):
             # Only change to hover state if we are in DEFAULT
             if self.state == ControlState.DEFAULT:
                 self._change_state(ControlState.HOVER)
@@ -113,7 +125,7 @@ class TextBox(object):
 
     def handle_mouse_press(self, x, y, button, modifiers):
         if (0 < x - self.location[0] < self.size[0] and
-            0 < y - self.location[1] < self.size[1]):
+            0 < self.location[1] - y < self.size[1]):
             if self.state != ControlState.FOCUS:
                 self.caret.position = len(self.document.text)
                 self._change_state(ControlState.FOCUS)
@@ -121,7 +133,6 @@ class TextBox(object):
                 self.caret.on_mouse_press(x, y, button, modifiers)
 
             return True
-
 
     def handle_mouse_release(self, x, y, button, modifiers):
         pass
@@ -139,13 +150,22 @@ class TextBox(object):
     def update_entry(self):
         # print('position: %d || mark: %s || text: %s' % (self.caret.position, self.caret.mark, self.document.text))
         text = self.document.text
-        words = text.split(' ')
+        lines = text.split('\n')
+        words = []
+        for line in lines:
+            words.extend(line.split(' '))
+        print(words)
         for id in range(0, len(text) - 1):
             if text[id].isupper() and id in [text.find(word) for word in words if len(word) > 1]:
-                print('adding purple')
                 self.document.set_style(id, id + 1, dict(color=CT_PRIMARY['search']))
             else:
                 self.document.set_style(id, id + 1, dict(color=CT_OFFWHITE))
+
+        # Change the rect, borders, and layout based on line count
+        self.size = self.size[0], self._original_height + (len(lines) - 1) * BOX_LINE_SIZE
+        self.layout.height = self.size[1]
+        self.layout.y = self.location[1] - self.size[1] - 8
+        self._generate_visual_elements()
 
 
     # Text entry mouse and keyboard events

@@ -1,0 +1,9 @@
+freemysqlhosting.net creds:
+    u/n: scott.kemperman@gmail.com
+    pwd: (KBjR8u!IJ9TYWnB
+
+Server: sql3.freemysqlhosting.net
+Name: sql3264960
+Username: sql3264960
+Password: 4qkCEeX9j6
+Port number: 3306

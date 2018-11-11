@@ -1,5 +1,9 @@
 
 
+class Mode:
+    SEARCH = 'search'
+    ENTER = 'enter'
+
 class ControlState:
     DEFAULT = 0
     HOVER = 1
@@ -9,5 +13,6 @@ class ControlState:
 class ButtonState:
     DEFAULT = 0
     HOVER = 1
-    PRESSED = 2
-    DISABLED = 3
+    FOCUS = 2
+    PRESSED = 3
+    DISABLED = 4

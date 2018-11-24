@@ -54,6 +54,8 @@ class TextBox(object):
         self.caret.mark = None
         self.caret.visible = False
 
+    def get_content(self):
+        return self.document.text
 
     def _get_background(self):
         return self.background_color[self.state]

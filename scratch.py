@@ -1,10 +1,4 @@
-source = "This is a\nMultiline statement"
+from pyglet.window import key
 
-lines = source.split('\n')
-words = []
-for line in lines:
-    words.extend(line.split(' '))
-
-print(source)
-print(lines)
-print(words)
+print(key.TAB)
+print(key.NUM_TAB)

@@ -3,7 +3,7 @@ from typing import Tuple
 
 class Rectangle(object):
     def __init__(self, batch, group, left, top, right, bottom, color: Tuple[int, int, int, int]):
-        self._batch = batch
+        self._batch = batch if batch else pyglet.graphics.Batch()
         self._color = color
         self._left = left
         self._right = right
@@ -43,6 +43,10 @@ class Rectangle(object):
         self._bottom = self._top - new_size[1]
 
         self._build_vertex_list()
+
+    # Only needs to be called if user does not pass a batch to constructor
+    def draw(self):
+        self._batch.draw()
 
 # Only support pure horizontal or vertical lines, nothing angled
 class Line(object):

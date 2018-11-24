@@ -1,5 +1,4 @@
 import pyglet
-from enums import *
 from window import MainWindow
 from pyglet import gl, font
 

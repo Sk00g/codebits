@@ -2,7 +2,7 @@ import pyglet
 from swidget import UIElement, ControlState
 
 
-class ControlElement(UIElement):
+class ControlElement(UIElement, pyglet.event.EventDispatcher):
     def __init__(self, batch, style: dict={}, group=None, position=(0, 0), size=(0, 0), visible=True, is_tab_stop=True):
         UIElement.__init__(self, batch, group, position, size, visible)
 
@@ -20,6 +20,9 @@ class ControlElement(UIElement):
 
         self._state = new_state
         self._apply_style()
+
+        if new_state == ControlState.HOVER:
+            self.dispatch_event('on_hover')
 
     # --- Public Methods ---
 
@@ -84,3 +87,7 @@ class ControlElement(UIElement):
             # Only change back from hover state if mouse leaves
             if self._state == ControlState.HOVER:
                 self._update_state(ControlState.FOCUS if self._has_focus else ControlState.DEFAULT)
+
+
+# Register additional swidget events
+ControlElement.register_event_type('on_hover')

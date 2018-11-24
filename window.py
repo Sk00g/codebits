@@ -35,6 +35,7 @@ class MainWindow(ControlWindow):
         # Textbox
         self.textbox = Textbox(self.batch, size=(500, 34), font_size=12, group=self.group_front)
         self.textbox.center(WINDOW_WIDTH // 2, 300)
+        self.textbox.push_handlers(on_hover=self.textbox_hovered)
         self.add_children(self.textbox)
 
         self.textbox2 = Textbox(self.batch, size=(500, 34), font_size=12, group=self.group_front)
@@ -75,6 +76,8 @@ class MainWindow(ControlWindow):
         # self.test_badge = Badge((100, 100), 'Infiniti', CT_PRIMARY[Mode.SEARCH], CT_PRIMARY_LIGHT_TINGE[Mode.SEARCH])
         # self.test_badge2 = Badge((200, 100), 'Work', CT_PRIMARY[Mode.ENTER], CT_PRIMARY_LIGHT_TINGE[Mode.ENTER])
 
+    def textbox_hovered(self):
+        print("textbox is hovered, raise tooltip")
 
     def _change_mode(self):
         if self.mode == Mode.ENTER:

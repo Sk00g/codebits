@@ -4,6 +4,7 @@
 Maintains state across calls to 'parse_input', so use multiple instances if required
 """
 
+import re
 from templating.enums import *
 
 
@@ -29,19 +30,21 @@ class Templater:
         original_topics = self.topics.copy()
         original_chunks = self.chunks.copy()
 
+
         lines = text.split('\n')
         words = []
         for line in lines:
             words.extend(line.split(' '))
 
         # create topics automatically from capitalized words
-        capitalized_words = [word for word in words if len(word) > 2 and word[0].isupper() and word != words[-1] and word != words[0]]
+        capitalized_words = [w.rstrip(" /=-_") for w in re.findall("[A-Z][A-Za-z0-9]{3,}[ /=\-_]|[A-Z][A-Za-z0-9]{3,}$", text)]
+        # capitalized_words = [word for word in words if len(word) > 2 and word[0].isupper() and word != words[-1] and word != words[0]]
         for word in capitalized_words:
             self._add_topic(word, False)
 
         # remove topics that were implicit and are no longer present
         implicit_topics = [kvp[0] for kvp in original_topics if not kvp[1]]
-        removed_topics = [t for t in implicit_topics if text.find(t) == -1]
+        removed_topics = [t for t in implicit_topics if not t in words]
         for topic in removed_topics:
             self._remove_topic(topic)
 

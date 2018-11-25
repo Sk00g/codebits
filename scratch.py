@@ -1,15 +1,29 @@
-from templating import Templater
+# from templating import Templater
+#
+# temp = Templater()
+#
+# resp = temp.parse_input("My name is Scott ")
+#
+# print(resp)
+#
+# resp = temp.parse_input("My name is Scott")
+#
+# print(resp)
+#
+# resp = temp.parse_input("My name is Scot")
+#
+# print(resp)
+import re
 
-temp = Templater()
 
-resp = temp.parse_input("My name is Scott ")
+data = "Heroku/seomthing else To Tom Tomo Heroku-baby Heroku_Kemperman Heroku=Kemperman"
 
-print(resp)
 
-resp = temp.parse_input("My name is Scott")
+# result = re.sub("[ \t]", "", data)
+result = [w.rstrip(" /=-_") for w in re.findall("[A-Z][A-Za-z0-9]{3,}[ /=\-_]|[A-Z][A-Za-z0-9]*$", data)]
+first_word = re.findall("^\w*", data)
+last_word = re.findall("\w*", data)
 
-print(resp)
-
-resp = temp.parse_input("My name is Scot")
-
-print(resp)
+print(result)
+print(first_word)
+print(last_word)

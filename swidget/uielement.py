@@ -49,6 +49,10 @@ class UIElement(object):
     def get_size(self):
         return self._size
 
+    def is_point_within(self, point):
+        return (0 < point[0] - self._position[0] < self._size[0] and
+                0 < (UIElement.SCREEN_HEIGHT - point[1]) - self._position[1] < self._size[1])
+
     def __repr__(self):
         return 'UIElement (%d, %d)' % self._position
 

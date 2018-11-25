@@ -1,9 +1,10 @@
 import pyglet
 from swidget import UIElement
+from swidget.theme import Basic
 
 
 class Label(UIElement):
-    def __init__(self, batch, position=(0, 0), text="label", font_name="Arimo", font_color=(0xDD, 0xDD, 0xDD, 0xFF),
+    def __init__(self, batch, position=(0, 0), text="label", font_name="Arimo", font_color=Basic.OFFWHITE,
                  font_size=12, group=None, visible=True):
 
         self._document = pyglet.text.document.FormattedDocument(text)

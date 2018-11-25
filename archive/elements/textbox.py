@@ -1,8 +1,8 @@
 import pyglet
-from pyglet.window import key, mouse
-from const import *
-from enums import *
-from primitives import Rectangle, Line
+from pyglet.window import key
+from archive.const import *
+from archive.enums import *
+from archive.primitives import Rectangle, Line
 
 
 class TextBox(object):

@@ -49,6 +49,9 @@ class ControlElement(UIElement, pyglet.event.EventDispatcher):
     def get_style(self, state, prop):
         return self._style[state][prop]
 
+    def get_state(self):
+        return self._state
+
     # --- Abstract Methods ---
 
     """
@@ -77,9 +80,8 @@ class ControlElement(UIElement, pyglet.event.EventDispatcher):
     Handle different events, dished here by a parent ControlWindow object.
     Feel free to override these, otherwise the most obvious base functionality is provided here.
     """
-    def handle_mouse_motion(self, x, y):
-        if (0 < x - self._position[0] < self._size[0] and
-                0 < (UIElement.SCREEN_HEIGHT - y) - self._position[1] < self._size[1]):
+    def handle_mouse_motion(self, x, y, dx, dy):
+        if self.is_point_within((x, y)):
             # Only change to hover state if we are in DEFAULT
             if self._state == ControlState.DEFAULT or self._state == ControlState.FOCUS:
                 self._update_state(ControlState.HOVER)
@@ -88,6 +90,26 @@ class ControlElement(UIElement, pyglet.event.EventDispatcher):
             if self._state == ControlState.HOVER:
                 self._update_state(ControlState.FOCUS if self._has_focus else ControlState.DEFAULT)
 
+    def handle_mouse_press(self, x, y, button, modifiers):
+        pass
+
+    def handle_mouse_release(self, x, y, button, modifiers):
+        pass
+
+    def handle_mouse_drag(self, x, y, dx, dy, button, modifiers):
+        pass
+
+    def handle_text(self, text):
+        pass
+
+    def handle_text_motion(self, motion):
+        pass
+
+    def handle_text_motion_select(self, motion):
+        pass
+
+    def handle_key_press(self, symbol, modifiers):
+        pass
 
 # Register additional swidget events
 ControlElement.register_event_type('on_hover')

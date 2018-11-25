@@ -1,7 +1,7 @@
 import pyglet
-from primitives import Rectangle, Line
-from const import *
-from enums import *
+from archive.primitives import Rectangle, Line
+from archive.const import *
+from archive.enums import *
 
 
 

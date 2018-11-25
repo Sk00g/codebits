@@ -1,4 +1,4 @@
-from enums import *
+from archive.enums import *
 
 
 # General style

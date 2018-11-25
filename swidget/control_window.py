@@ -1,6 +1,6 @@
 import pyglet
 from pyglet.window import key
-from swidget import UIElement, ControlElement
+from swidget import UIElement, ControlElement, ControlState
 
 
 
@@ -23,7 +23,8 @@ class ControlWindow(pyglet.window.Window):
 
     # Order the control children indexes based on Y position
     def order_controls(self):
-        self._controls.sort(key=lambda ele: ele.get_position()[1])
+        self._controls.sort(key=lambda ele: (ele.get_position()[1], ele.get_position()[0]))
+
 
     def add_children(self, *args):
         for child in args:
@@ -34,10 +35,34 @@ class ControlWindow(pyglet.window.Window):
 
             if isinstance(child, ControlElement):
                 self._controls.append(child)
+                self.push_handlers(
+                    on_mouse_motion=child.handle_mouse_motion,
+                    on_mouse_drag=child.handle_mouse_drag,
+                    on_mouse_release=child.handle_mouse_release,
+                    on_mouse_press=child.handle_mouse_press
+                )
 
-    def on_mouse_motion(self, x, y, dx, dy):
+    def on_mouse_press(self, x, y, button, modifiers):
         for control in self._controls:
-            control.handle_mouse_motion(x, y)
+            if control.is_point_within((x, y)) and control.get_state() != ControlState.DISABLED:
+                if self._focus_index != -1:
+                    self._controls[self._focus_index].alter_focus(False)
+
+                self._focus_index = self._controls.index(control)
+                self._controls[self._focus_index].alter_focus(True)
+
+
+    def on_text(self, text):
+        if self._focus_index != -1:
+            self._controls[self._focus_index].handle_text(text)
+
+    def on_text_motion(self, motion):
+        if self._focus_index != -1:
+            self._controls[self._focus_index].handle_text_motion(motion)
+
+    def on_text_motion_select(self, motion):
+        if self._focus_index != -1:
+            self._controls[self._focus_index].handle_text_motion_select(motion)
 
     def on_key_press(self, symbol, modifiers):
         if symbol == key.TAB or symbol == 98784247808:
@@ -45,6 +70,9 @@ class ControlWindow(pyglet.window.Window):
 
         if symbol == key.ESCAPE:
             pyglet.app.exit()
+
+        if self._focus_index != -1:
+            self._controls[self._focus_index].handle_key_press(symbol, modifiers)
 
 
     # --- Private Methods ---

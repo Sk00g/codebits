@@ -1,7 +1,8 @@
 import pyglet
 from pyglet.window import key
-from swidget import ControlWindow, UIElement, Image, Rectangle, Label, Textbox
-from const import *
+from swidget import ControlWindow, Image, Rectangle, Label, Textbox, Button
+from swidget.theme import Basic
+from archive.const import *
 
 
 FONT = 'Arimo'
@@ -14,8 +15,6 @@ class MainWindow(ControlWindow):
     def __init__(self):
         super().__init__(WINDOW_WIDTH, WINDOW_HEIGHT, caption=WINDOW_CAPTION)
 
-        self.mode = Mode.ENTER
-
         # Use a single batch with foreground / background groups to draw everything for now
         self.batch = pyglet.graphics.Batch()
         self.group_bkgr = pyglet.graphics.OrderedGroup(0)
@@ -27,20 +26,26 @@ class MainWindow(ControlWindow):
         self.add_children(self.background, self.background_shadow)
 
         # Title
-        self.title = Label(self.batch, text='codebits', font_name="Arimo", font_size=18, font_color=(0xDD, 0xDD, 0xDD, 0xff),
+        self.title = Label(self.batch, text='codebits', font_name="Arimo", font_size=18, font_color=Basic.OFFWHITE,
                            group=self.group_front)
         self.title.center(WINDOW_WIDTH // 2, 50)
         self.add_children(self.title)
 
         # Textbox
         self.textbox = Textbox(self.batch, size=(500, 34), font_size=12, group=self.group_front)
-        self.textbox.center(WINDOW_WIDTH // 2, 300)
-        self.textbox.push_handlers(on_hover=self.textbox_hovered)
+        self.textbox.center(WINDOW_WIDTH // 2, 130)
         self.add_children(self.textbox)
 
-        self.textbox2 = Textbox(self.batch, size=(500, 34), font_size=12, group=self.group_front)
-        self.textbox2.center(WINDOW_WIDTH // 2, 130)
-        self.add_children(self.textbox2)
+        # Mode Button
+        self.search_button = Button(self.batch, 'assets/search2-purple.png',
+                                  (self.textbox.get_position()[0] - 34, self.textbox.get_position()[1]),
+                                  (34, 34), lambda: print('clicked search'), self.group_front)
+
+        # Enter button
+        self.enter_button = Button(self.batch, 'assets/login2-teal.png',
+                                   (self.textbox.get_position()[0] + self.textbox.get_size()[0], self.textbox.get_position()[1]),
+                                   (34, 34), group=self.group_front)
+        self.add_children(self.search_button, self.enter_button)
 
         self.order_controls()
 
@@ -76,26 +81,23 @@ class MainWindow(ControlWindow):
         # self.test_badge = Badge((100, 100), 'Infiniti', CT_PRIMARY[Mode.SEARCH], CT_PRIMARY_LIGHT_TINGE[Mode.SEARCH])
         # self.test_badge2 = Badge((200, 100), 'Work', CT_PRIMARY[Mode.ENTER], CT_PRIMARY_LIGHT_TINGE[Mode.ENTER])
 
-    def textbox_hovered(self):
-        print("textbox is hovered, raise tooltip")
-
     def _change_mode(self):
         if self.mode == Mode.ENTER:
             self.mode = Mode.SEARCH
         elif self.mode == Mode.SEARCH:
             self.mode = Mode.ENTER
 
-    # def on_key_press(self, symbol, modifiers):
-    #     if symbol == key.A:
-    #         old = self.textbox.get_position()
-    #         self.textbox.set_position((old[0] - 5, old[1] - 5))
-    #     elif symbol == key.S:
-    #         old = self.textbox.get_position()
-    #         self.textbox.set_position((old[0] + 5, old[1] + 5))
-    #
-    #     if symbol == key.ESCAPE:
-    #         self.close()
+    def on_key_press(self, symbol, modifiers):
+        super().on_key_press(symbol, modifiers)
 
+        if symbol == key.NUM_ADD:
+            self.textbox.set_text(self.textbox.get_text() + ' lsdfs')
+        elif symbol == key.A:
+            sty = self.textbox.get_text_style("color", 2, 3)
+            print(sty)
+            print(type(sty))
+        elif symbol == key.S:
+            self.textbox.set_text_style(2, 4, dict(color=(255, 0, 0, 255)))
 
     #
     # def _update_focus(self):

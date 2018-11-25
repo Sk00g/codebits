@@ -83,7 +83,7 @@ class ControlElement(UIElement, pyglet.event.EventDispatcher):
     def handle_mouse_motion(self, x, y, dx, dy):
         if self.is_point_within((x, y)):
             # Only change to hover state if we are in DEFAULT
-            if self._state == ControlState.DEFAULT or self._state == ControlState.FOCUS:
+            if self._state == ControlState.DEFAULT:
                 self._update_state(ControlState.HOVER)
         else:
             # Only change back from hover state if mouse leaves

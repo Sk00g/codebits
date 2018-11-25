@@ -5,7 +5,7 @@ from swidget.theme import Basic
 
 
 class Textbox(ControlElement, pyglet.event.EventDispatcher):
-    BOX_LINE_HEIGHT = 18
+    BOX_LINE_HEIGHT = 19
 
     def __init__(self, batch, position=(0, 0), size=(100, 20), font_size=12, group=None, visible=True):
         default_style = {
@@ -76,8 +76,9 @@ class Textbox(ControlElement, pyglet.event.EventDispatcher):
 
     def _render(self):
         # Alter height based on line count
-        lines = self._document.text.split('\n')
-        self._size = self._size[0], self._original_height + (len(lines) - 1) * Textbox.BOX_LINE_HEIGHT
+        line_count = self._layout.get_line_count()
+        # lines = self._document.text.split('\n')
+        self._size = self._size[0], self._original_height + (line_count - 1) * Textbox.BOX_LINE_HEIGHT
         self._layout.height = self._size[1]
 
         self._layout.x = self._position[0] + 10
@@ -121,16 +122,28 @@ class Textbox(ControlElement, pyglet.event.EventDispatcher):
         self._caret.on_mouse_drag(x, y, dx, dy, button, modifiers)
 
     def handle_text(self, text):
+        before = self._document.text
         self._caret.on_text(text)
         self._render()
 
+        if before != self._document.text:
+            self.dispatch_event('on_text_change', self._document.text)
+
     def handle_text_motion(self, motion):
+        before = self._document.text
         self._caret.on_text_motion(motion)
         self._render()
 
+        if before != self._document.text:
+            self.dispatch_event('on_text_change', self._document.text)
+
     def handle_text_motion_select(self, motion):
+        before = self._document.text
         self._caret.on_text_motion_select(motion)
         self._render()
+
+        if before != self._document.text:
+            self.dispatch_event('on_text_change', self._document.text)
 
     def _apply_style(self):
         style = self._style

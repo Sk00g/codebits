@@ -1,4 +1,15 @@
-from pyglet.window import key
+from templating import Templater
 
-print(key.TAB)
-print(key.NUM_TAB)
+temp = Templater()
+
+resp = temp.parse_input("My name is Scott ")
+
+print(resp)
+
+resp = temp.parse_input("My name is Scott")
+
+print(resp)
+
+resp = temp.parse_input("My name is Scot")
+
+print(resp)

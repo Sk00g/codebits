@@ -33,6 +33,18 @@ class UIElement(object):
     def get_position(self):
         return self._position
 
+    def left(self):
+        return self._position[0]
+
+    def right(self):
+        return self._position[0] + self._size[0]
+
+    def top(self):
+        return self._position[1]
+
+    def bottom(self):
+        return self._position[1] + self._size[1]
+
     def center(self, x=-1, y=-1):
         newx, newy = self._position
 

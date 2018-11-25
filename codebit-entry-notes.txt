@@ -1,0 +1,13 @@
+
+Suggestions, template engine, and GUI should operate on the text every time it changes, in that order.
+
+- Suggestions -> find close matches to topics / chunk types / codebit types, and report to GUI engine
+- Template Engine -> parse text for matching syntax, alter topic, types, chunks, etc. as appropriate, then update text appropriately
+- GUI -> Visualize suggestions, topics, chunk types, and codebit types
+    * suggestions -> show above textbox, layer vertically. Explain suggested operation in English, clicking it performs suggestion
+    * topics -> show as badges directly beneath text box. Clicking will remove topic
+    * chunk types -> certain chunk types have specific styling associated. Other chunk types have a selection bkgr and description beneath
+        the text box. Hover over chunk content or description for description + content to be highlighted
+    * codebit types -> listed beneath the text box as plain text explanation
+
+

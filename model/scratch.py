@@ -3,7 +3,9 @@ import pymysql
 
 if __name__ == '__main__':
     print('attempting connection')
-    conn = pymysql.connect(host='sql3.freemysqlhosting.net', user='sql3264960', port=3306, db='sql3264960', passwd='4qkCEeX9j6')
+    conn = pymysql.connect(host='sql3.freemysqlhosting.net',
+                           user='sql3264960', port=3306,
+                           db='sql3264960', passwd='4qkCEeX9j6')
 
     cursor = conn.cursor()
 

@@ -1,9 +1,9 @@
 import pyglet
 from pyglet.window import key
-from swidget import ControlWindow, Image, Rectangle, Label, Textbox, Button
+from swidget import ControlWindow, Image, Rectangle, Label, Textbox, Button, Badge
 from swidget.theme import Basic
 from archive.const import *
-
+from templating import Templater
 
 FONT = 'Arimo'
 WINDOW_CAPTION = 'Codebits'
@@ -11,9 +11,14 @@ WINDOW_WIDTH = 640
 WINDOW_HEIGHT = 427
 WINDOW_SHADOW_COLOR = (10, 15, 25, 200)
 
+
 class MainWindow(ControlWindow):
     def __init__(self):
         super().__init__(WINDOW_WIDTH, WINDOW_HEIGHT, caption=WINDOW_CAPTION)
+
+        self.topics = []
+        self.topic_badges = []
+        self.chunks = []
 
         # Use a single batch with foreground / background groups to draw everything for now
         self.batch = pyglet.graphics.Batch()
@@ -34,6 +39,7 @@ class MainWindow(ControlWindow):
         # Textbox
         self.textbox = Textbox(self.batch, size=(500, 34), font_size=12, group=self.group_front)
         self.textbox.center(WINDOW_WIDTH // 2, 130)
+        self.textbox.push_handlers(on_text_change=self.on_textbox_change)
         self.add_children(self.textbox)
 
         # Mode Button
@@ -49,114 +55,62 @@ class MainWindow(ControlWindow):
 
         self.order_controls()
 
-        # Button icons
-        # self.search_icon = pyglet.resource.image('assets/search2-purple.png')
-        # self.enter_icon = pyglet.resource.image('assets/login2-teal.png')
-        #
-        # # Title
-        # self.title = pyglet.text.Label(TITLE_TEXT, FONT, TITLE_SIZE, x=self.width // 2, y=TITLE_Y,
-        #                                anchor_x='center', anchor_y='center', color=TITLE_COLOR)
-        #
-        # # Text box
-        # self.box = TextBox(self, self.batch, (WINDOW_WIDTH // 2 - (BOX_WIDTH + BUTTON_WIDTH) // 2, BOX_Y),
-        #                    (BOX_WIDTH, BOX_HEIGHT), BOX_BORDER_DEFAULT, (255, 255, 255, 10))
-        # self.box.hover_border_color = BOX_BORDER_HOVER
-        #
-        # # Button
-        # self.mode_button = Button(self.batch, self.search_icon, (self.box.location[0] + self.box.size[0], self.box.location[1]),
-        #                             (BUTTON_WIDTH, BUTTON_HEIGHT), BUTTON_BKGR_DEFAULT, BUTTON_BORDER_DEFAULT)
-        # self.mode_button.hover_bkgr = BUTTON_BKGR_HOVER[self.mode]
-        # self.mode_button.hover_border = BUTTON_BORDER_HOVER
-        # self.mode_button.click_actions.append(self._change_mode)
-        #
-        # # Lists for simplified handling of input events
-        # self.mouse_motion_controls = [self.box, self.mode_button]
-        # self.mouse_click_controls = [self.box, self.mode_button]
-        # self.keyboard_controls = [self.box, self.mode_button]
-        #
-        # # Import to add focusable controls in the order you want to tab through them
-        # self.focusable_controls = [self.box, self.mode_button]
-        #
-        # # test
-        # self.test_badge = Badge((100, 100), 'Infiniti', CT_PRIMARY[Mode.SEARCH], CT_PRIMARY_LIGHT_TINGE[Mode.SEARCH])
-        # self.test_badge2 = Badge((200, 100), 'Work', CT_PRIMARY[Mode.ENTER], CT_PRIMARY_LIGHT_TINGE[Mode.ENTER])
 
-    def _change_mode(self):
-        if self.mode == Mode.ENTER:
-            self.mode = Mode.SEARCH
-        elif self.mode == Mode.SEARCH:
-            self.mode = Mode.ENTER
+        self.templater = Templater()
+
+    def badge_click(self, badge):
+        print('clicked badge %s' % badge)
+
+    def update_topics(self):
+        if self.topic_badges:
+            self.remove_children(self.topic_badges)
+            self.topic_badges.clear()
+
+        totalx = 0
+        for id in range(len(self.topics)):
+            topic = self.topics[id]
+
+            position = self.textbox.left() + totalx + id * 10, self.textbox.bottom() + 12
+            modulo = id % 4
+            if modulo == 0:
+                border, tinge = Basic.PRIMARY, Basic.PRIMARY_BRIGHT_TINGE
+            elif modulo == 1:
+                border, tinge = Basic.SECOND, Basic.SECOND_BRIGHT_TINGE
+            elif modulo == 2:
+                border, tinge = Basic.THIRD, Basic.THIRD_BRIGHT_TINGE
+            else:
+                border, tinge = Basic.FOURTH, Basic.FOURTH_BRIGHT_TINGE
+            style = {
+                ControlState.DEFAULT: dict(border_color=border),
+                ControlState.HOVER: dict(background_color=tinge)
+            }
+
+            badge = Badge(self.batch, text=topic, click_event=lambda: self.badge_click(badge),
+                          position=position, group=self.group_front)
+            badge.update_style(style)
+            self.topic_badges.append(badge)
+            totalx += badge.get_size()[0]
+
+        if self.topic_badges:
+            self.add_children(self.topic_badges)
 
     def on_key_press(self, symbol, modifiers):
         super().on_key_press(symbol, modifiers)
 
-        if symbol == key.NUM_ADD:
-            self.textbox.set_text(self.textbox.get_text() + ' lsdfs')
-        elif symbol == key.A:
-            sty = self.textbox.get_text_style("color", 2, 3)
-            print(sty)
-            print(type(sty))
-        elif symbol == key.S:
-            self.textbox.set_text_style(2, 4, dict(color=(255, 0, 0, 255)))
+        if symbol == key.A:
+            print('children: %d | controls: %d' % (len(self._children), len(self._controls)))
 
-    #
-    # def _update_focus(self):
-    #     for i in range(len(self.focusable_controls)):
-    #         self.focusable_controls[i].alter_focus(i == self.focused_control_index)
-    #
-    # def on_mouse_motion(self, x, y, dx, dy):
-    #     for control in self.mouse_click_controls:
-    #         control.handle_mouse_motion(x, y)
-    #
-    # def on_mouse_press(self, x, y, button, modifiers):
-    #     print('mouse was pressed at %d, %d with button %s || (%s)' % (x, y, button, modifiers))
-    #
-    #     for control in self.mouse_click_controls:
-    #         if control.handle_mouse_press(x, y, button, modifiers):
-    #             self.focused_control_index = self.focusable_controls.index(control)
-    #             self._update_focus()
-    #
-    # def on_mouse_release(self, x, y, button, modifiers):
-    #     for control in self.mouse_click_controls:
-    #         control.handle_mouse_release(x, y, button, modifiers)
-    #
-    # def on_key_press(self, symbol, modifiers):
-    #     # Tab or Shift + Tab presses iterate through focusable controls
-    #     if symbol == key.TAB:
-    #         self.focused_control_index += -1 if modifiers & key.MOD_SHIFT else 1
-    #         if self.focused_control_index < 0:
-    #             self.focused_control_index = len(self.focusable_controls) - 1
-    #         elif self.focused_control_index == len(self.focusable_controls):
-    #             self.focused_control_index = 0
-    #         self._update_focus()
-    #
-    #     if symbol == key.ESCAPE:
-    #         self.close()
-    #
-    #     for control in self.keyboard_controls:
-    #         control.handle_key_press(symbol, modifiers)
-    #
-    # def on_key_release(self, symbol, modifiers):
-    #     for control in self.keyboard_controls:
-    #         control.handle_key_release(symbol, modifiers)
-    #
-    # # Pass these along only to the text box
-    # def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
-    #     self.box.caret.on_mouse_drag(x, y, dx, dy, buttons, modifiers)
-    #
-    # def on_text(self, text):
-    #     self.box.on_text(text)
-    #
-    # def on_text_motion(self, motion):
-    #     self.box.on_text_motion(motion)
-    #
-    # def on_text_motion_select(self, motion):
-    #     self.box.on_text_motion_select(motion)
-    #
-    # def on_textbox_update(self):
-    #     # Update the list of topic badges
-    #     #
-    #     pass
+    def on_textbox_change(self, text):
+        response = self.templater.parse_input(text)
+        print(response)
+
+        if response['new_topics']:
+            self.topics.extend(response['new_topics'])
+        if response['removed_topics']:
+            for topic in response['removed_topics']:
+                self.topics.remove(topic)
+        if response['new_topics'] or response['removed_topics']:
+            self.update_topics()
 
 
     def on_draw(self):

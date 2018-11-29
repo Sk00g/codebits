@@ -4,12 +4,14 @@ from swidget import ControlWindow, Image, Rectangle, Label, Textbox, Button, Bad
 from swidget.theme import Basic
 from archive.const import *
 from templating import Templater
+from model import DataEngine
 
 FONT = 'Arimo'
 WINDOW_CAPTION = 'Codebits'
 WINDOW_WIDTH = 640
 WINDOW_HEIGHT = 427
 WINDOW_SHADOW_COLOR = (10, 15, 25, 200)
+MINIMUM_CODEBIT_SIZE = 4
 
 
 class MainWindow(ControlWindow):
@@ -57,6 +59,7 @@ class MainWindow(ControlWindow):
 
 
         self.templater = Templater()
+        self.engine = DataEngine()
 
     def badge_click(self, badge):
         print('clicked badge %s' % badge)
@@ -94,16 +97,44 @@ class MainWindow(ControlWindow):
         if self.topic_badges:
             self.add_children(self.topic_badges)
 
+    def submit_codebit(self):
+        if len(self.textbox.get_text()) < MINIMUM_CODEBIT_SIZE:
+            # popup with error??
+            return
+
+        codebit_data = self.templater.generate_snapshot()
+        self.engine.insert_codebit(codebit_data)
+
+        self.textbox.set_text("")
+        self.on_textbox_change("")
+        self.topics = []
+        self.update_topics()
+
     def on_key_press(self, symbol, modifiers):
         super().on_key_press(symbol, modifiers)
 
-        if symbol == key.A:
-            print('children: %d | controls: %d' % (len(self._children), len(self._controls)))
+        if self._focus_index == self._controls.index(self.textbox) and symbol == key.ENTER and modifiers & key.MOD_CTRL:
+            self.submit_codebit()
 
     def on_textbox_change(self, text):
         response = self.templater.parse_input(text)
-        print(response)
 
+        # Match text to templater output
+        if response['altered_text'] != text:
+            text = response['altered_text']
+            old_position = self.textbox._caret.position
+            self.textbox.set_text(text)
+            self.textbox._caret.position = len(text)
+
+        # Clear text styling
+        self.textbox.set_text_style(0, len(text), dict(color=Basic.OFFWHITE, background_color=None))
+
+        # Highlight partial commands
+        if response['partial_command']:
+            start, end = response['partial_command']
+            self.textbox.set_text_style(start, end, dict(background_color=Basic.PRIMARY_LIGHT_TINGE))
+
+        # Update topicsrok
         if response['new_topics']:
             self.topics.extend(response['new_topics'])
         if response['removed_topics']:
@@ -111,6 +142,10 @@ class MainWindow(ControlWindow):
                 self.topics.remove(topic)
         if response['new_topics'] or response['removed_topics']:
             self.update_topics()
+
+        # Update chunk styles
+
+        # Update codebit type
 
 
     def on_draw(self):

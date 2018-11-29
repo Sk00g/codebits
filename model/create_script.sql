@@ -4,7 +4,7 @@
 
 
 DROP TABLE if EXISTS codebit_topic_jnc;
-DROP TABLE if EXISTS chunk;
+DROP TABLE if EXISTS chunks;
 DROP TABLE if EXISTS codebits;
 DROP TABLE if EXISTS topics;
 DROP TABLE if EXISTS chunk_types;
@@ -38,13 +38,15 @@ insert into codebit_types (name) values
 CREATE TABLE codebits (
     id INTEGER auto_increment,
     codebitType_id INTEGER,
+    content TEXT,
     PRIMARY KEY(id),
     FOREIGN KEY(codebitType_id) REFERENCES codebit_types(id)
 );
 
 CREATE TABLE chunks (
     id INTEGER auto_increment,
-    content TEXT,
+    startIndex INTEGER not null,
+    endIndex INTEGER not null,
     chunkType_id INTEGER,
     codebit_id INTEGER,
     PRIMARY KEY(id),

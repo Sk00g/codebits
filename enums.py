@@ -31,6 +31,9 @@ class EntryMode:
 TOPIC_HOTKEY = key.T
 
 CODEBIT_HOTKEYS = {
+    key._1: CodebitType.CHILL,
+    key._2: CodebitType.IMPORTANT,
+    key._3: CodebitType.REMINDER,
     key.NUM_1: CodebitType.CHILL,
     key.NUM_2: CodebitType.IMPORTANT,
     key.NUM_3: CodebitType.REMINDER

@@ -58,7 +58,21 @@ class MainWindow(ControlWindow):
         self.order_controls()
 
         self.entry_master = EntryMaster(self.textbox)
+        self.entry_master.push_handlers(
+            on_add_chunk=self.on_chunk_add,
+            on_add_topic=self.on_topic_add,
+            on_codebit_type_change=self.on_codebit_type_change
+        )
         self.engine = DataEngine()
+
+    def on_codebit_type_change(self, new_type):
+        print('changed codebit type to %s' % new_type)
+
+    def on_chunk_add(self, chunk_type, start, end):
+        print('add chunk request for (%s, %s)' % (chunk_type, self.textbox.get_text()[start:end]))
+
+    def on_topic_add(self, start, end):
+        print('add topic request for (%s)' % (self.textbox.get_text()[start:end]))
 
     def badge_click(self, badge):
         print('clicked badge %s' % badge)

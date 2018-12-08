@@ -106,6 +106,9 @@ class ControlWindow(pyglet.window.Window):
         if self._focus_index != -1:
             self._controls[self._focus_index].handle_key_press(symbol, modifiers)
 
+    def on_key_release(self, symbol, modifiers):
+        if self._focus_index != -1:
+            self._controls[self._focus_index].handle_key_release(symbol, modifiers)
 
     # --- Private Methods ---
     def _handle_tab_press(self, modifiers):

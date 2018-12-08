@@ -7,7 +7,7 @@ Codebit type is controlled by ctrl + [123]
 Chunk 'enter' is ctrl + CHAR
 Chunk 'exit' ctrl + CHAR again, ESCAPE, or ctrl + BCKSPC
 
-Chunks are started by typic ctrl + CHAR, and finished by 'escape' or 'ctrl + BCKSPCE' or 'ctrl + CHAR' again
+Chunks are started by typic ctrl + CHAR, cancelled by 'escape' or 'ctrl + BCKSPCE' or 'ctrl + CHAR' again, and submitted by 'shift + ENTER'
     Entry:
     - If nothing is selected and caret is at the end of the sentence, switch to 'chunk entry' mode
     - If nothing is selected and caret is in the middle of a word, make that word the designated chunk data
@@ -28,6 +28,7 @@ Chunks are started by typic ctrl + CHAR, and finished by 'escape' or 'ctrl + BCK
     Mode Logic:
     - Modes are entered per above logic
     - Modes are always exited if the caret moves behind the chunk / topic starting point
+    - Selecting an alternate chunk type while in entry mode will swap the current mode
     - Making a selection cancels the mode
 
 

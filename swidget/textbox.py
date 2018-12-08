@@ -58,6 +58,9 @@ class Textbox(ControlElement, pyglet.event.EventDispatcher):
         self._caret.mark = None
         self._caret.visible = False
 
+        # Keep track of modifiers for text input blocking
+        self._modifiers = 0
+
         # Base class establishes style
         ControlElement.__init__(self, batch, default_style, group, position, size, visible)
 
@@ -124,7 +127,11 @@ class Textbox(ControlElement, pyglet.event.EventDispatcher):
 
         self._update_caret()
 
+    def handle_key_release(self, symbol, modifiers):
+        self._modifiers = modifiers
+
     def handle_key_press(self, symbol, modifiers):
+        self._modifiers = modifiers
         self.dispatch_event('on_key_press', symbol, modifiers)
 
         if symbol == key.A and modifiers & key.MOD_CTRL:
@@ -137,6 +144,9 @@ class Textbox(ControlElement, pyglet.event.EventDispatcher):
         self._update_caret()
 
     def handle_text(self, text):
+        if text[len(text) -1] in ['\r', '\n'] and (self._modifiers & key.MOD_SHIFT or self._modifiers & key.MOD_CTRL):
+            return True
+
         before = self._document.text
         self._caret.on_text(text)
         self._update_caret()

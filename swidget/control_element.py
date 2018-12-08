@@ -111,5 +111,8 @@ class ControlElement(UIElement, pyglet.event.EventDispatcher):
     def handle_key_press(self, symbol, modifiers):
         pass
 
+    def handle_key_release(self, symbol, modifiers):
+        pass
+
 # Register additional swidget events
 ControlElement.register_event_type('on_hover')

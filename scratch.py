@@ -16,10 +16,12 @@
 import re
 
 
-data = "Heroku/seomthing else To Tom Tomo Heroku-baby Heroku_Kemperman Heroku=Kemperman"
+data = "     \n\n\r\n "
 
-print(data.index("Heroku"))
-print(data.count("Heroku"))
+print(len(data))
+print(len(data.strip()))
+if data.strip():
+    print('nothing')
 
 # result = re.sub("[ \t]", "", data)
 # result = [w.rstrip(" /=-_") for w in re.findall(r"[A-Z][A-Za-z0-9]{3,}[ /=\-_]|[A-Z][A-Za-z0-9]*$", data)]

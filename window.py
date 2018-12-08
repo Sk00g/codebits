@@ -1,10 +1,12 @@
 import pyglet
+import re
 from pyglet.window import key
 from swidget import ControlWindow, Image, Rectangle, Label, Textbox, Button, Badge
 from swidget.theme import Basic
 from archive.const import *
 from entry import EntryMaster
-from model import DataEngine
+from model import DataEngine, Chunk, Codebit
+from enums import *
 
 FONT = 'Arimo'
 WINDOW_CAPTION = 'Codebits'
@@ -13,11 +15,25 @@ WINDOW_HEIGHT = 427
 WINDOW_SHADOW_COLOR = (10, 15, 25, 200)
 MINIMUM_CODEBIT_SIZE = 4
 
+CHUNK_COLORS = {
+    ChunkType.PLAIN_TEXT: [0, 0, 0, 0],
+    ChunkType.CREDENTIALS: Basic.PRIMARY_LIGHT_TINGE,
+    ChunkType.PHONE_NUMBER: Basic.PRIMARY_LIGHT_TINGE,
+    ChunkType.ADDRESS: Basic.PRIMARY_LIGHT_TINGE,
+    ChunkType.CLI: Basic.PRIMARY_LIGHT_TINGE,
+    ChunkType.CODE: Basic.PRIMARY_LIGHT_TINGE,
+    ChunkType.DATE: Basic.PRIMARY_LIGHT_TINGE,
+    ChunkType.LINK: Basic.PRIMARY_LIGHT_TINGE,
+    ChunkType.QUOTE: Basic.PRIMARY_LIGHT_TINGE,
+    ChunkType.TIME: Basic.PRIMARY_LIGHT_TINGE
+}
+
 
 class MainWindow(ControlWindow):
     def __init__(self):
         super().__init__(WINDOW_WIDTH, WINDOW_HEIGHT, caption=WINDOW_CAPTION)
 
+        self.ctype = CodebitType.CHILL
         self.topics = []
         self.topic_badges = []
         self.chunks = []
@@ -41,7 +57,10 @@ class MainWindow(ControlWindow):
         # Textbox
         self.textbox = Textbox(self.batch, size=(500, 34), font_size=12, group=self.group_front)
         self.textbox.center(WINDOW_WIDTH // 2, 130)
-        self.textbox.push_handlers(on_text_change=self.on_textbox_change)
+        self.textbox.push_handlers(
+            on_text_change=self.on_textbox_change,
+            on_caret_change=self.on_textbox_caret_change
+        )
         self.add_children(self.textbox)
 
         # Mode Button
@@ -55,6 +74,12 @@ class MainWindow(ControlWindow):
                                    (34, 34), group=self.group_front)
         self.add_children(self.search_button, self.enter_button)
 
+        # Status strings
+        self.ctype_label = Label(self.batch, position=(15, 15), text="type: CHILL", group=self.group_front, font_size=10)
+        self.chunk_count_label = Label(self.batch, position=(15, 35), text="chunks: 0", group=self.group_front, font_size=10)
+        self.char_count_label = Label(self.batch, position=(15, 55), text="chars: 0", group=self.group_front, font_size=10)
+        self.add_children(self.ctype_label, self.chunk_count_label, self.char_count_label)
+
         self.order_controls()
 
         self.entry_master = EntryMaster(self.textbox)
@@ -65,14 +90,33 @@ class MainWindow(ControlWindow):
         )
         self.engine = DataEngine()
 
+    # --- HELPERS ---
+    def _all_string_indices(self, string, sub):
+        indices = []
+        i = string.find(sub)
+        while i >= 0:
+            indices.append(i)
+            i = string.find(sub, i + 1)
+        return indices
+
     def on_codebit_type_change(self, new_type):
         print('changed codebit type to %s' % new_type)
+        self.ctype = new_type
+        self._update_status_labels()
 
     def on_chunk_add(self, chunk_type, start, end):
         print('add chunk request for (%s, %s)' % (chunk_type, self.textbox.get_text()[start:end]))
+        self.chunks.append(Chunk(None, chunk_type, start, end))
+        self._update_status_labels()
 
     def on_topic_add(self, start, end):
         print('add topic request for (%s)' % (self.textbox.get_text()[start:end]))
+        text = self.textbox.get_text()[start:end]
+        if text in self.topics:
+            self.topics.remove(text)
+        else:
+            self.topics.append(text)
+        self.update_topics()
 
     def badge_click(self, badge):
         print('clicked badge %s' % badge)
@@ -129,37 +173,35 @@ class MainWindow(ControlWindow):
         if self._focus_index == self._controls.index(self.textbox) and symbol == key.ENTER and modifiers & key.MOD_CTRL:
             self.submit_codebit()
 
-    def on_textbox_change(self, text):
+    def on_textbox_caret_change(self, mark, position):
         pass
-        # response = self.templater.parse_input(text)
-        #
-        # # Match text to templater output
-        # if response['altered_text'] != text:
-        #     text = response['altered_text']
-        #     old_position = self.textbox._caret.position
-        #     self.textbox.set_text(text)
-        #     self.textbox._caret.position = len(text)
-        #
-        # # Clear text styling
-        # self.textbox.set_text_style(0, len(text), dict(color=Basic.OFFWHITE, background_color=None))
-        #
-        # # Highlight partial commands
-        # if response['partial_command']:
-        #     start, end = response['partial_command']
-        #     self.textbox.set_text_style(start, end, dict(background_color=Basic.PRIMARY_LIGHT_TINGE))
-        #
-        # # Update topics ok
-        # if response['new_topics']:
-        #     self.topics.extend(response['new_topics'])
-        # if response['removed_topics']:
-        #     for topic in response['removed_topics']:
-        #         self.topics.remove(topic)
-        # if response['new_topics'] or response['removed_topics']:
-        #     self.update_topics()
+
+    def _update_status_labels(self):
+        self.ctype_label.set_text("type: %s" % self.ctype)
+        self.chunk_count_label.set_text("chunks: %d" % len(self.chunks))
+        self.char_count_label.set_text("chars: %d" % len(self.textbox.get_text()))
+
+    def on_textbox_change(self, text):
+        self._update_status_labels()
+
+        # Clear text styling
+        self.textbox.set_text_style(0, len(text), dict(color=Basic.OFFWHITE, background_color=None))
+
+        # Update topic styles
+        for topic in self.topics:
+            index_list = self._all_string_indices(text, topic)
+            if index_list:
+                for index in index_list:
+                    self.textbox.set_text_style(index, index + len(topic), dict(color=Basic.PRIMARY_HIGHLIGHT))
 
         # Update chunk styles
+        for chunk in self.chunks:
+            self.textbox.set_text_style(chunk.start, chunk.end,
+                                        dict(color=Basic.NEARWHITE, background_color=CHUNK_COLORS[chunk.ctype]))
 
         # Update codebit type
+
+
 
 
     def on_draw(self):

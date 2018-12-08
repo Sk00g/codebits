@@ -1,0 +1,7 @@
+Every time text and/or caret changes, remove all styling
+
+- Topics should be different color
+- codebit type, chunks, and char count should be displayed in top left
+- each chunk content should have a faded background
+- entry word should be faintly color background highlighted
+- selection is colored background

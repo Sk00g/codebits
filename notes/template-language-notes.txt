@@ -1,0 +1,51 @@
+
+Heroku is an interesting Cloud platform
+Login details for Heroku: scott.kemperman@gmail.com / usual with caps and numbers
+
+
+Codebit type is controlled by ctrl + [123]
+Chunk 'enter' is ctrl + CHAR
+Chunk 'exit' ctrl + CHAR again, ESCAPE, or ctrl + BCKSPC
+
+Chunks are started by typic ctrl + CHAR, and finished by 'escape' or 'ctrl + BCKSPCE' or 'ctrl + CHAR' again
+    Entry:
+    - If nothing is selected and caret is at the end of the sentence, switch to 'chunk entry' mode
+    - If nothing is selected and caret is in the middle of a word, make that word the designated chunk data
+    - If anything is selected, make selection the designated chunk data
+    Exit:
+    - If nothing is selected and we are in 'chunk entry' mode, exit mode and generate chunk
+    - If nothing is selected and caret is within a chunk, exit that chunk
+    - If nothing is selected and caret is anywhere else, do nothing
+    - If any part of selection is within a chunk, exit that chunk
+    Topic:
+    - When a topic is added by mode, remove the word from the actual text
+    - If nothing is selected, switch to 'topic entry' mode
+    - 'topic entry' mode ends automatically when user presses space
+    - If caret is within a word, make that word a topic
+    - If a word is selected (trim whitespace), make that word a topic
+    - If multiple words are within selection, do nothing
+
+    Mode Logic:
+    - Modes are entered per above logic
+    - Modes are always exited if the caret moves behind the chunk / topic starting point
+    - Making a selection cancels the mode
+
+
+
+    PLAIN_TEXT = "Plain Text"       None
+    QUOTE = "Quote"                 Q
+    PHONE_NUMBER = "Phone Number"   P
+    CODE = "Code"                   {
+    CLI = "CLI"                     -
+    CREDENTIALS = "Credentials"     R
+    LINK = "Link"                   L
+    DATE = "Date"                   D
+    TIME = "Time"                   I
+    ADDRESS = "Address"             S
+
+    Topic                           T
+
+
+    CHILL
+    IMPORTANT
+    REMINDER

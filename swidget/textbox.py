@@ -26,6 +26,8 @@ class Textbox(ControlElement, pyglet.event.EventDispatcher):
 
         self._font_size = font_size
         self._original_height = size[1]
+        self._prev_caret_mark = 0
+        self._prev_caret_position = 0
 
         self._group_back = pyglet.graphics.OrderedGroup(0, group)
         self._group_front = pyglet.graphics.OrderedGroup(1, group)
@@ -104,6 +106,13 @@ class Textbox(ControlElement, pyglet.event.EventDispatcher):
     def get_text_style(self, attr, start, end):
         return self._document.get_style_range(attr, start, end)
 
+    def _update_caret(self):
+        if self._prev_caret_mark != self._caret.mark or self._prev_caret_position != self._caret.position:
+            self.dispatch_event('on_caret_change', self._caret.mark, self._caret.position)
+
+        self._prev_caret_position = self._caret.position
+        self._prev_caret_mark = self._caret.mark
+
     def handle_mouse_press(self, x, y, button, modifiers):
         if not self.is_point_within((x, y)):
             return
@@ -113,17 +122,24 @@ class Textbox(ControlElement, pyglet.event.EventDispatcher):
         else:
             self._caret.on_mouse_press(x, y, button, modifiers)
 
+        self._update_caret()
+
     def handle_key_press(self, symbol, modifiers):
+        self.dispatch_event('on_key_press', symbol, modifiers)
+
         if symbol == key.A and modifiers & key.MOD_CTRL:
             self._caret.position = 0
             self._caret.mark = len(self._document.text)
+            self._update_caret()
 
     def handle_mouse_drag(self, x, y, dx, dy, button, modifiers):
         self._caret.on_mouse_drag(x, y, dx, dy, button, modifiers)
+        self._update_caret()
 
     def handle_text(self, text):
         before = self._document.text
         self._caret.on_text(text)
+        self._update_caret()
         self._render()
 
         if before != self._document.text:
@@ -132,6 +148,7 @@ class Textbox(ControlElement, pyglet.event.EventDispatcher):
     def handle_text_motion(self, motion):
         before = self._document.text
         self._caret.on_text_motion(motion)
+        self._update_caret()
         self._render()
 
         if before != self._document.text:
@@ -140,6 +157,7 @@ class Textbox(ControlElement, pyglet.event.EventDispatcher):
     def handle_text_motion_select(self, motion):
         before = self._document.text
         self._caret.on_text_motion_select(motion)
+        self._update_caret()
         self._render()
 
         if before != self._document.text:
@@ -162,3 +180,5 @@ class Textbox(ControlElement, pyglet.event.EventDispatcher):
 
 
 Textbox.register_event_type('on_text_change')
+Textbox.register_event_type('on_caret_change')
+Textbox.register_event_type('on_key_press')

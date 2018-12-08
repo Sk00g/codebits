@@ -1,4 +1,4 @@
-# from templating import Templater
+# from entry import Templater
 #
 # temp = Templater()
 #

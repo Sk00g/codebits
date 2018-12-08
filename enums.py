@@ -3,6 +3,9 @@
 These enumerations should map directly to the MySQL backend
 """
 
+from pyglet.window import key
+
+
 class ChunkType:
     PLAIN_TEXT = "Plain Text"
     QUOTE = "Quote"
@@ -20,19 +23,27 @@ class CodebitType:
     IMPORTANT = "Important"
     REMINDER = "Reminder"
 
-class TECommand:
-    TOPIC = "T"
-    CREDENTIAL = "C"
-    PHONE = "P"
-    CLI = "L"
-    ADDRESS = "A"
-    REMINDER = "R"
-    CHILL = "H"
-    IMPORTANT = "I"
+class EntryMode:
+    BASIC = "Basic"
+    CHUNK = "Chunk"
+    TOPIC = "Topic"
 
-CHUNK_TYPE = {
-    TECommand.ADDRESS: ChunkType.ADDRESS,
-    TECommand.CREDENTIAL: ChunkType.CREDENTIALS,
-    TECommand.PHONE: ChunkType.PHONE_NUMBER,
-    TECommand.CLI: ChunkType.CLI,
+TOPIC_HOTKEY = key.T
+
+CODEBIT_HOTKEYS = {
+    key.NUM_1: CodebitType.CHILL,
+    key.NUM_2: CodebitType.IMPORTANT,
+    key.NUM_3: CodebitType.REMINDER
+}
+
+CHUNK_HOTKEYS = {
+    key.Q: ChunkType.QUOTE,
+    key.P: ChunkType.PHONE_NUMBER,
+    key.BRACKETLEFT: ChunkType.CODE,
+    key.MINUS: ChunkType.CLI,
+    key.R: ChunkType.CREDENTIALS,
+    key.L: ChunkType.LINK,
+    key.D: ChunkType.DATE,
+    key.I: ChunkType.TIME,
+    key.S: ChunkType.ADDRESS
 }

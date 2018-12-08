@@ -3,7 +3,7 @@ from pyglet.window import key
 from swidget import ControlWindow, Image, Rectangle, Label, Textbox, Button, Badge
 from swidget.theme import Basic
 from archive.const import *
-from templating import Templater
+from entry import EntryMaster
 from model import DataEngine
 
 FONT = 'Arimo'
@@ -57,8 +57,7 @@ class MainWindow(ControlWindow):
 
         self.order_controls()
 
-
-        self.templater = Templater()
+        self.entry_master = EntryMaster(self.textbox)
         self.engine = DataEngine()
 
     def badge_click(self, badge):
@@ -102,8 +101,8 @@ class MainWindow(ControlWindow):
             # popup with error??
             return
 
-        codebit_data = self.templater.generate_snapshot()
-        self.engine.insert_codebit(codebit_data)
+        # codebit_data = self.templater.generate_snapshot()
+        # self.engine.insert_codebit(codebit_data)
 
         self.textbox.set_text("")
         self.on_textbox_change("")
@@ -117,31 +116,32 @@ class MainWindow(ControlWindow):
             self.submit_codebit()
 
     def on_textbox_change(self, text):
-        response = self.templater.parse_input(text)
-
-        # Match text to templater output
-        if response['altered_text'] != text:
-            text = response['altered_text']
-            old_position = self.textbox._caret.position
-            self.textbox.set_text(text)
-            self.textbox._caret.position = len(text)
-
-        # Clear text styling
-        self.textbox.set_text_style(0, len(text), dict(color=Basic.OFFWHITE, background_color=None))
-
-        # Highlight partial commands
-        if response['partial_command']:
-            start, end = response['partial_command']
-            self.textbox.set_text_style(start, end, dict(background_color=Basic.PRIMARY_LIGHT_TINGE))
-
-        # Update topicsrok
-        if response['new_topics']:
-            self.topics.extend(response['new_topics'])
-        if response['removed_topics']:
-            for topic in response['removed_topics']:
-                self.topics.remove(topic)
-        if response['new_topics'] or response['removed_topics']:
-            self.update_topics()
+        pass
+        # response = self.templater.parse_input(text)
+        #
+        # # Match text to templater output
+        # if response['altered_text'] != text:
+        #     text = response['altered_text']
+        #     old_position = self.textbox._caret.position
+        #     self.textbox.set_text(text)
+        #     self.textbox._caret.position = len(text)
+        #
+        # # Clear text styling
+        # self.textbox.set_text_style(0, len(text), dict(color=Basic.OFFWHITE, background_color=None))
+        #
+        # # Highlight partial commands
+        # if response['partial_command']:
+        #     start, end = response['partial_command']
+        #     self.textbox.set_text_style(start, end, dict(background_color=Basic.PRIMARY_LIGHT_TINGE))
+        #
+        # # Update topics ok
+        # if response['new_topics']:
+        #     self.topics.extend(response['new_topics'])
+        # if response['removed_topics']:
+        #     for topic in response['removed_topics']:
+        #         self.topics.remove(topic)
+        # if response['new_topics'] or response['removed_topics']:
+        #     self.update_topics()
 
         # Update chunk styles
 
